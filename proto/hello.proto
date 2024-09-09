@@ -1,0 +1,27 @@
+syntax="proto3";
+package hello;
+option go_package = "/gen";
+
+import "google/protobuf/timestamp.proto";
+
+service ChatRoom {
+    rpc Join(JoinRequest) returns (stream Message) {}
+    rpc SendMessage(Message) returns (Exit) {}
+}
+
+message User {
+    string id = 1;
+    string name = 2;
+}
+
+message Message {
+    string id = 1;
+    string message = 2;
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message JoinRequest {
+    User user = 1;
+}
+
+message Exit {}
