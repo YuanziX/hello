@@ -45,6 +45,12 @@ func (p *Server) Join(jReq *pb.JoinRequest, stream pb.ChatRoom_JoinServer) error
 
 	log.Printf("%v joined chatroom %v.\n", conn.id, conn.roomID)
 
+	go func() {
+		<-stream.Context().Done()
+		log.Printf("User %v disconnected from chatroom %v.\n", conn.id, conn.roomID)
+		conn.error <- stream.Context().Err()
+	}()
+
 	err := <-conn.error
 
 	p.mu.Lock()
