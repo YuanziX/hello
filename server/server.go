@@ -75,7 +75,7 @@ func (p *Server) SendMessage(ctx context.Context, msg *pb.Message) (*pb.Exit, er
 	if _, ok := p.Chatrooms[msg.RoomID]; !ok {
 		return &pb.Exit{
 			Success: false,
-			Message: fmt.Sprintf("chatroom with id %v does not exist.\n", msg.RoomID),
+			Message: fmt.Sprintf("chatroom with id %v does not exist.", msg.RoomID),
 		}, nil
 	}
 
