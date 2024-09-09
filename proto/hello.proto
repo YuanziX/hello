@@ -26,4 +26,7 @@ message JoinRequest {
     User user = 2;
 }
 
-message Exit {}
+message Exit {
+    bool success = 1;
+    string message = 2;
+}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 
@@ -65,27 +66,32 @@ func (p *Server) Join(jReq *pb.JoinRequest, stream pb.ChatRoom_JoinServer) error
 }
 
 func (p *Server) SendMessage(ctx context.Context, msg *pb.Message) (*pb.Exit, error) {
+	if _, ok := p.Chatrooms[msg.RoomID]; !ok {
+		return &pb.Exit{
+			Success: false,
+			Message: fmt.Sprintf("chatroom with id %v does not exist.\n", msg.RoomID),
+		}, nil
+	}
+
 	wait := sync.WaitGroup{}
 
 	done := make(chan int)
 
 	p.mu.RLock()
-	for _, val := range p.Chatrooms {
-		for _, conn := range val {
-			wait.Add(1)
+	for _, conn := range p.Chatrooms[msg.RoomID] {
+		wait.Add(1)
 
-			go func(msg *pb.Message, conn *Connection) {
-				defer wait.Done()
+		go func(msg *pb.Message, conn *Connection) {
+			defer wait.Done()
 
-				err := conn.stream.Send(msg)
-				log.Printf("Sending message to: %v from %v\n", conn.id, msg.Id)
+			err := conn.stream.Send(msg)
+			log.Printf("Sending message to: %v from %v\n", conn.id, msg.Id)
 
-				if err != nil {
-					log.Printf("Error with Stream: %v - Error: %v\n", conn.stream, err)
-					conn.error <- err
-				}
-			}(msg, conn)
-		}
+			if err != nil {
+				log.Printf("Error with Stream: %v - Error: %v\n", conn.stream, err)
+				conn.error <- err
+			}
+		}(msg, conn)
 	}
 
 	go func() {
@@ -96,5 +102,7 @@ func (p *Server) SendMessage(ctx context.Context, msg *pb.Message) (*pb.Exit, er
 	<-done
 	p.mu.RUnlock()
 
-	return &pb.Exit{}, nil
+	return &pb.Exit{
+		Success: true,
+	}, nil
 }
