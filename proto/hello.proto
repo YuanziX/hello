@@ -16,12 +16,14 @@ message User {
 
 message Message {
     string id = 1;
-    string message = 2;
-    google.protobuf.Timestamp timestamp = 3;
+    string roomID = 2;
+    string message = 3;
+    google.protobuf.Timestamp timestamp = 4;
 }
 
 message JoinRequest {
-    User user = 1;
+    string roomID = 1;
+    User user = 2;
 }
 
 message Exit {}

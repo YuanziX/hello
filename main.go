@@ -13,10 +13,8 @@ import (
 func main() {
 	grpcServer := grpc.NewServer()
 
-	var conn []*server.Connection
-
-	pool := &server.Pool{
-		Connection: conn,
+	pool := &server.Server{
+		Chatrooms: make(map[string][]*server.Connection),
 	}
 
 	pb.RegisterChatRoomServer(grpcServer, pool)
